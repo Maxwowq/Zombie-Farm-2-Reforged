@@ -6,6 +6,14 @@ import extra from "./locales/zh-CN-extra.json";
 afterEach(() => useMessages("en", {}));
 
 describe("translation at the display boundary", () => {
+  it("uses reward-collection wording instead of the original Claim mistranslation", () => {
+    useMessages("zh-CN", { ...original, ...extra });
+    expect(original.Claim).toBe("索要");
+    expect(t("Claim")).toBe("领取");
+    expect(t("Claimed")).toBe("已领取");
+    expect(t("✓ Claimed")).toBe("✓已领取");
+  });
+
   it("uses original IPA wording and falls back on missing or empty translations", () => {
     useMessages("zh-CN", { ...original, Empty: "", "Empty {0}": "" });
     expect(t("Brains")).toBe("脑子");

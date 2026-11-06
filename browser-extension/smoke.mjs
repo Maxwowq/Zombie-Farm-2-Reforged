@@ -13,7 +13,7 @@ const fixture = `<!doctype html><meta http-equiv="Content-Security-Policy" conte
 <p id="timer">2h</p><p id="level">🔒 Lvl 13</p><h1 id="heading">Settings</h1><p id="dynamic">Level 8</p><button id="button" title="Harvest">Market</button>
 <input id="input" value="Carrots" placeholder="Search"><select id="select"><option>Harvest</option></select>
 <div class="fr-friend-name">Carrots</div><div class="zcard-board">Daisy</div><div class="ann-body">Carrots</div>
-<pre>Settings</pre><canvas width="240" height="64" id="canvas"></canvas>`;
+<section class="qdetail" id="quest-fixture"><h2>Tomato Farmin'</h2><div class="qobj">◆ Plant 10 Tomatoes  (0/10)</div><div class="qobj done">✓ Harvest 10 Tomatoes  (10/10)</div><div class="qlog-reward">Reward: 20 XP</div><button class="pq-claim">Claim</button><span class="pq-claimed">✓ Claimed</span></section><pre>Settings</pre><canvas width="240" height="64" id="canvas"></canvas>`;
 await fs.writeFile(path.join(dist, 'extension-fixture.html'), fixture);
 await fs.mkdir(path.join(root, 'tmp'), {recursive:true});
 const profile = await fs.mkdtemp(path.join(root, 'tmp/edge-extension-smoke-'));
@@ -43,6 +43,9 @@ try {
   assert.equal(await page.locator('.zcard-board').innerText(),'Daisy');
   assert.equal(await page.locator('.ann-body').innerText(),'Carrots');
   assert.equal(await page.locator('pre').innerText(),'Settings');
+  assert(!/[A-Za-z]{3}/.test(await page.locator('#quest-fixture').innerText()));
+  assert((await page.locator('#quest-fixture .qobj').first().textContent()).endsWith('  (0/10)'));
+  assert.equal(await page.locator('#quest-fixture .pq-claim').innerText(),'领取');
   assert.equal(await page.locator('#dynamic').innerText(),'8级');
   assert.equal(await page.locator('#timer').innerText(),'2小时');
   assert.equal(await page.locator('#level').innerText(),'🔒 13级');
@@ -97,8 +100,61 @@ try {
   await page.waitForFunction(()=>window.__extensionDrawCalls.some(c=>c.text==='Plow'&&c.font.includes('15px')),null,{timeout:15000});
   await page.screenshot({path:path.join(root,'tmp/extension-plow.png')});
   console.log('PASS: actual upstream farming work bar passed Plow through the installed Canvas translator.');
+  // Raise only the generated offline test farm, then let the real client author
+  // daily/weekly quests. No debug game handle or production account is used.
+  await page.waitForTimeout(1800);
+  await page.addInitScript(()=>{
+    if(localStorage.getItem('extension-test-level-seeded')) return;
+    const key='zf2r.local.save.v1::'+JSON.parse(localStorage.getItem('zf2r.profiles.v1')).activeId;
+    if(!key)throw Error('Missing generated test save');
+    const save=JSON.parse(localStorage.getItem(key));save.player.xp=4500;
+    delete save.periodicQuests;delete save.farmJobs;localStorage.setItem(key,JSON.stringify(save));
+    localStorage.setItem('extension-test-level-seeded','1');
+  });
+  async function reopen(){
+    await page.reload();await page.locator('#bootStatus.ready').waitFor({timeout:90000});
+    await page.locator('#boot').click();await page.waitForTimeout(1000);
+  }
+  await reopen();
+  await page.keyboard.press('q');await page.locator('.questlog').waitFor();await page.waitForTimeout(500);
+  const objectives=await page.locator('.qlog-obj').allTextContents();
+  assert(objectives.length>0&&objectives.every(t=>!/[A-Za-z]{3}/.test(t)),JSON.stringify(objectives));
+  await page.screenshot({path:path.join(root,'tmp/extension-quests.png')});
+  await page.locator('.questlog .panelclose').click();
+  await page.waitForFunction(()=>{
+    const key='zf2r.local.save.v1::'+JSON.parse(localStorage.getItem('zf2r.profiles.v1')).activeId;
+    return key&&JSON.parse(localStorage.getItem(key)).periodicQuests?.daily;
+  },null,{timeout:10000});
+  await page.addInitScript(()=>{
+    if(localStorage.getItem('extension-test-completion-seeded')) return;
+    const key='zf2r.local.save.v1::'+JSON.parse(localStorage.getItem('zf2r.profiles.v1')).activeId;
+    const save=JSON.parse(localStorage.getItem(key));
+    save.periodicQuests.daily.counts[0]=save.periodicQuests.daily.quests[0].countTotal;
+    save.periodicQuests.daily.claimed=[];localStorage.setItem(key,JSON.stringify(save));
+    localStorage.setItem('extension-test-completion-seeded','1');
+  });
+  await reopen();await page.locator('.qperiodic').click();await page.locator('.pq-daily').waitFor();
+  await page.waitForTimeout(500);
+  const periodic=await page.locator('.pq-text').allTextContents();
+  assert(periodic.length>=5&&periodic.every(t=>!/[A-Za-z]{3}/.test(t)),JSON.stringify(periodic));
+  assert.deepEqual(await page.locator('.pq-title').allTextContents(),['每日任务','每周任务']);
+  assert.equal(await page.locator('.pq-daily .pq-claim').first().innerText(),'领取');
+  await page.screenshot({path:path.join(root,'tmp/extension-daily.png')});
+  await page.locator('.pq-daily .pq-claim').first().click();
+  await page.waitForFunction(()=>[...document.querySelectorAll('.pq-daily .pq-claimed')].some(e=>e.textContent.includes('已领取')));
+  await page.screenshot({path:path.join(root,'tmp/extension-daily-claimed.png')});
+  const canonical=await page.evaluate(()=>{
+    const key='zf2r.local.save.v1::'+JSON.parse(localStorage.getItem('zf2r.profiles.v1')).activeId;
+    return JSON.parse(localStorage.getItem(key)).periodicQuests.daily.quests[0].text;
+  });
+  assert(/[A-Za-z]{3}/.test(canonical));
+  console.log('PASS: actual quest log objectives, daily/weekly tasks, Claim → 领取, live claim → 已领取, canonical English saved objective preserved.');
   console.log('PASS: unmodified upstream production build, no window.ZF, translated Market + Carrots; errors:',errors);
   assert.deepEqual(errors,[]);
+} catch(error) {
+  await page.screenshot({path:path.join(root,'tmp/extension-quest-failure.png')});
+  await fs.writeFile(path.join(root,'tmp/extension-quest-failure.txt'),await page.locator('body').innerText());
+  throw error;
 } finally {
   await context.close();
   await fs.rm(profile,{recursive:true,force:true});

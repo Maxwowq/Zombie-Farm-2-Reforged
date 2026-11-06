@@ -17,6 +17,15 @@ The browser smoke test verified:
 - Real farm work reaches the JobSystem's 15px `Plow` progress label, distinct from the 22px cursor hint. The progress bar visibly displays 犁.
 - No browser page errors in these checks.
 
+Version 0.1.1 adds a quest regression check covering 1230 distinct strings from
+both authored quest catalogs and daily/weekly generation at multiple levels and
+periods. Objective markers and live counters are preserved while translating the
+inner text, task-title counters, reward labels and reset durations. `Claim` is
+overridden to 领取 and `Claimed` to 已领取; the original IPA table retains 索要.
+The browser test also opens the real quest log and daily/weekly board in a
+generated level-15 offline test farm, verifies Chinese objectives and headings,
+clicks 领取 and checks the resulting 已领取 state. Saved quest text remains English.
+
 The distributable manifest excludes localhost. Its JavaScript is the same as the
 tested build; `--test-origins` only changes the manifest's URL matching.
 

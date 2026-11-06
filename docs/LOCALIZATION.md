@@ -27,6 +27,8 @@ The Chinese display overrides normalize `Carrots` from 红萝卜 to 胡萝卜,
 including golden variants, mutations, quests and tutorial lines. They also change
 the flower decoration `Daisy` from 黛西 to 雏菊, matching the original quest and
 description wording. The extracted IPA tables remain unchanged for comparison.
+Reward actions use `Claim` → 领取 and `Claimed` → 已领取 instead of the original
+索要 wording; this applies to daily/weekly quest rewards and other claim actions.
 
 ### Naming review
 

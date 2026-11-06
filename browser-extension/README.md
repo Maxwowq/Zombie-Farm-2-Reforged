@@ -12,6 +12,9 @@
 3. 选择构建生成的 `browser-extension/dist` 目录（包含 `manifest.json`）。
 4. 刷新 `https://zombiefarmreforged.com/`，扩展会自动应用中文。
 
+更新到 0.1.1 时，先移除旧扩展，再加载新版目录并刷新游戏。若直接覆盖了
+原插件目录里的文件，在扩展管理页点击「重新加载」，然后刷新游戏即可。
+
 关闭扩展并刷新页面即可恢复原来的显示。游戏依然运行在原网站地址上，
 使用原网站的存档及登录状态；扩展没有读写 localStorage、Cookie、账号或
 游戏服务器的代码，也不调用在线翻译服务。
@@ -20,6 +23,8 @@
 
 - 复用 IPA 原始中文表和独立维护的 Reforged 补译。
 - 翻译 DOM 文本、悬停说明、占位文字及无障碍标签。
+- 任务行会分别翻译内容、状态符号和进度；每日/每周任务的 `Claim`
+  显示为「领取」，领取后显示「已领取」。
 - 在 Canvas / OffscreenCanvas 的文字测量和绘制入口同时处理中文，
   覆盖 PixiJS 先绘制成纹理、再显示到 WebGL 画布上的文字。
 - 保留输入值、下拉选项的原始值和已适配位置的玩家/僵尸自定义名字。
@@ -37,6 +42,7 @@
 ```sh
 npx tsc -p browser-extension/tsconfig.json
 node tools/build-browser-extension.mjs
+npm run extension:check-quests
 ```
 
 生成内容约 0.5 MB，不包含游戏本体、图片、音频、IPA 或浏览器。
