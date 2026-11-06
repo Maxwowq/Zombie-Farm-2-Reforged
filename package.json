@@ -24,7 +24,8 @@
     "test:monotonic": "vitest run --config vitest.monotonic.config.ts && node tools/monotonic_table.mjs",
     "test:prodgrid": "vitest run --config vitest.prodgrid.config.ts && node tools/prod_grid_page.mjs",
     "test:lethality": "vitest run --config vitest.lethality.config.ts && node tools/lethality_table.mjs",
-    "test:search-fast": "node tools/search_fast.mjs"
+    "test:search-fast": "node tools/search_fast.mjs",
+    "extension:build": "tsc -p browser-extension/tsconfig.json && node tools/build-browser-extension.mjs"
   },
   "dependencies": {
     "pixi.js": "^8.6.6"

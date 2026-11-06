@@ -220,6 +220,12 @@ translation conventions and the Chinese coverage check. Run `npm run i18n:check`
 when adding UI copy; `npm test` includes this check. The checked-in language
 catalogs let a normal checkout build without an IPA.
 
+An experimental, standalone Chrome/Edge Chinese display extension can also run on
+the unmodified upstream game. It reuses these translations and covers DOM and
+Canvas text without changing the save or requiring a Worker deployment. See
+[browser-extension/README.md](browser-extension/README.md) for local installation,
+verification and coverage limits. It has not been published to an extension store.
+
 ## Run It Locally
 
 The four commands are in [Quick start](#quick-start-run-it-yourself) above; this section
