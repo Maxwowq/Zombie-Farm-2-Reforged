@@ -26,6 +26,11 @@ The browser test also opens the real quest log and daily/weekly board in a
 generated level-15 offline test farm, verifies Chinese objectives and headings,
 clicks 领取 and checks the resulting 已领取 state. Saved quest text remains English.
 
+Version 0.1.2 corrects the Market category `Decors` from 花色 to 装饰. The browser
+test opens Items → 装饰, checks the selected shelf and a known decoration (雏菊),
+and verifies that the mistaken 花色 tab is absent. Canonical game categories and
+the original IPA table remain unchanged.
+
 The distributable manifest excludes localhost. Its JavaScript is the same as the
 tested build; `--test-origins` only changes the manifest's URL matching.
 

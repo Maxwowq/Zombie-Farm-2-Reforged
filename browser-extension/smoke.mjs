@@ -84,6 +84,20 @@ try {
   assert(!/Lvl \d|\b\d+[dhms]\b/.test(market));
   await fs.writeFile(path.join(root,'tmp/extension-market.txt'),market);
   await page.screenshot({path:path.join(root,'tmp/extension-market.png')});
+  await page.locator('.mkt-tabs').getByRole('button',{name:'物品',exact:true}).click();
+  await page.waitForTimeout(500);
+  const decor=page.locator('.mkt-subtabs').getByRole('button',{name:'装饰',exact:true});
+  assert.equal(await page.locator('.mkt-subtabs').getByRole('button',{name:'花色',exact:true}).count(),0);
+  await decor.click();await page.waitForTimeout(500);
+  assert((await decor.getAttribute('class')).includes('sel'));
+  // Seasonal objects can occupy the first page; search a stable decoration by
+  // its canonical English name instead of assuming a particular shelf order.
+  await page.locator('.mkt-search-toggle').click();
+  await page.locator('.mkt-search').fill('Daisy');await page.waitForTimeout(500);
+  assert.equal(await page.locator('.mkt-search').inputValue(),'Daisy');
+  assert((await page.locator('.mkt').innerText()).includes('雏菊'));
+  await page.screenshot({path:path.join(root,'tmp/extension-decors.png')});
+  console.log('PASS: Items → 装饰 opens the original Decors shelf and displays Daisy as 雏菊.');
   await page.locator('.mkt-close').click();
   await page.evaluate(()=>{
     window.__extensionDrawCalls=[];

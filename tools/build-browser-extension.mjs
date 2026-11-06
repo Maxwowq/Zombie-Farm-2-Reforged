@@ -15,7 +15,7 @@ const matches = ["https://zombiefarmreforged.com/*", "https://www.zombiefarmrefo
 if (process.argv.includes("--test-origins")) matches.push("http://localhost:4180/*");
 await fs.writeFile(path.join(dist, "manifest.json"), JSON.stringify({
   manifest_version: 3,
-  name: "Zombie Farm Reforged 简体中文（实验版）", version: "0.1.1",
+  name: "Zombie Farm Reforged 简体中文（实验版）", version: "0.1.2",
   description: "复用原版译文与 Reforged 中文补译，翻译界面及画布文字。非官方扩展。",
   minimum_chrome_version: "111",
   content_scripts: [{ matches, js: ["content.js"], run_at: "document_start", world: "MAIN" }],

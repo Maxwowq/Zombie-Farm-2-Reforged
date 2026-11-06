@@ -29,6 +29,8 @@ the flower decoration `Daisy` from 黛西 to 雏菊, matching the original quest
 description wording. The extracted IPA tables remain unchanged for comparison.
 Reward actions use `Claim` → 领取 and `Claimed` → 已领取 instead of the original
 索要 wording; this applies to daily/weekly quest rewards and other claim actions.
+The Market's `Decors` category uses 装饰 instead of the original 花色, matching the
+decorative objects it contains; the canonical category key stays `Decors`.
 
 ### Naming review
 
